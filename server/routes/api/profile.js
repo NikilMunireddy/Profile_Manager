@@ -215,6 +215,73 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
   });
 
 
+//@route    PUT api/profile/education
+//@desc    Add profile education 
+//@Access   private
+
+router.put('/education', [ auth,
+      check('school', 'School is required').not().isEmpty(),
+      check('degree', 'Degree is required').not().isEmpty(),
+      check('fieldofstudy', 'Field of study is required').not().isEmpty(),
+      check('from', 'From date is required and needs to be from the past').not().isEmpty().custom((value, { req }) => (req.body.to ? value < req.body.to : true))
+    ], async(req, res)=>{
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            return res.satus(400).json({errors: errors.array()})
+        }
+    
+        const {
+            school,
+            degree,
+            fieldofstudy,
+            from,
+            to,
+            current,
+            description
+          } = req.body;
+    
+          const newEdu ={
+            school,
+            degree,
+            fieldofstudy,
+            from,
+            to,
+            current,
+            description
+          }
+    
+          try {
+              const profile =await Profile.findOne({user: req.user.id})
+              profile.education.unshift(newEdu);
+              await profile.save()
+    
+              res.json(profile)
+          } catch (err) {
+              console.error(err.message)
+              res.status(500).send('Server Error')
+          }
+    })
+    
+    //@route    DELETE api/profile/education/:edu_id
+    //@desc    Delete experince
+    //@Access   private
+    
+    router.delete('/education/:edu_id', auth, async (req, res) => {
+        try {
+          const foundProfile = await Profile.findOne({ user: req.user.id });
+        // rewrite same data except requested ID
+          foundProfile.education = foundProfile.education.filter(
+            exp => exp._id.toString() !== req.params.edu_id
+          );
+          await foundProfile.save();
+          return res.status(200).json(foundProfile);
+        } catch (error) {
+          console.error(error);
+          return res.status(500).json({ msg: 'Server error' });
+        }
+      });
+    
+
 module.exports= router;
 
 
@@ -230,11 +297,13 @@ curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoi
 
 /*   POST /profile/  Create profile
 
-curl -d '{ "company" :"Marriott","website":"https://marriott.com/","location":"chennai","status":"Developer","skills":"Java, Python, react, HTML"}'  -H "Content-Type: application/json" -H "x-auth-token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4ODE0NTM0MGNmMzcwOThjNTY3MzViIn0sImlhdCI6MTU4NTk3NjQwNCwiZXhwIjoxNTg2MzM2NDA0fQ.COjLQj8GodselvU6nPB_-2yNwMlRNamJuHhesY-fvW8" -X POST "http://localhost:5000/api/profile"
+curl -d '{ "company" :"Marriott","website":"https://marriott.com/","location":"chennai","status":"Developer","skills":"Java, Python, react, HTML"}' \
+-H "Content-Type: application/json" -H "x-auth-token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4ODE0NTM0MGNmMzcwOThjNTY3MzViIn0sImlhdCI6MTU4NTk3NjQwNCwiZXhwIjoxNTg2MzM2NDA0fQ.COjLQj8GodselvU6nPB_-2yNwMlRNamJuHhesY-fvW8" -X POST "http://localhost:5000/api/profile"
 
 */
 
 /*    GET /profile/  get all profiles
+
     curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4NzIwYjhhMDEwNjYwYjFjNmZiOGM1In0sImlhdCI6MTU4NTk2NTQ3MiwiZXhwIjoxNTg2MzI1NDcyfQ.zYVzaQRP72ADbTnQXjddEQnPeJsbpoIErllsIcCI04U"\
  -X GET "http://localhost:5000/api/profile"
 */
@@ -252,8 +321,21 @@ curl -d '{  "title":"Dev at Inversa", "company":"Inversa", "location":"bangalore
 
 */
 
-/*   DELETE /profile/ delete user profile, posts 
+/*   DELETE /profile/experience/:exp_id delete user profile, posts 
 
 curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4NzIwYjhhMDEwNjYwYjFjNmZiOGM1In0sImlhdCI6MTU4NTk4NDk3MywiZXhwIjoxNTg2MzQ0OTczfQ.K4gwiNHHGYimjLA8If5z2W0L86-WrB5Ns2dfkjNyG88" \
 -X DELETE "http://localhost:5000/api/profile/experience/5e8836a3cb91b517f0b00012"
+*/
+
+/*   PUT /profile/education
+
+curl -d '{"school":"KSIT", "degree":"BE", "fieldofstudy":"CSE", "from":"8-8-2015","to":"8-8-2019","current":false,"description": "Passed with 8.0"}' \
+ -H "Content-Type: application/json" -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4NzIwYjhhMDEwNjYwYjFjNmZiOGM1In0sImlhdCI6MTU4NTk4NDk3MywiZXhwIjoxNTg2MzQ0OTczfQ.K4gwiNHHGYimjLA8If5z2W0L86-WrB5Ns2dfkjNyG88" -X PUT "http://localhost:5000/api/profile/education"
+
+*/
+
+/*   DELETE /profile/education/:edu_id delete user profile, posts 
+
+curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4NzIwYjhhMDEwNjYwYjFjNmZiOGM1In0sImlhdCI6MTU4NTk4NDk3MywiZXhwIjoxNTg2MzQ0OTczfQ.K4gwiNHHGYimjLA8If5z2W0L86-WrB5Ns2dfkjNyG88" \
+-X DELETE "http://localhost:5000/api/profile/education/5e8854e7572bf619b8073e9c"
 */
