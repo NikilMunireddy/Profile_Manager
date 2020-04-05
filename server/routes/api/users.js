@@ -85,3 +85,9 @@ curl -d '{"name":"nikil", "email":"nikil@gmail.com", "password":"abcd12", "avata
 -H "Content-Type: application/json" -X POST "http://localhost:5000/api/users"
 
 */
+
+/*
+
+email: 'nithin@gmail.com',
+  password: '123456',
+*/
