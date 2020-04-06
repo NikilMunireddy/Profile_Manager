@@ -1,4 +1,4 @@
 node_modules/
 server/node_modules/
-ui/node_modules/
+server/ui/node_modules/
 server/config/default.json

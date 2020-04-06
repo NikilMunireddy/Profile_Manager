@@ -1,12 +1,12 @@
 import React ,{ Fragment, useState }from 'react'
 import {connect} from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
 import { setAlert } from '../../actions/alert';
 import PropTypes from 'prop-types'
+import { register } from '../../actions/auth'
 
 
-
-export const Register = ({ setAlert }) => {
+export const Register = ({ setAlert, register, isAuthenticated }) => {
 
     const [formData, setFormData] = useState({
         name: '',
@@ -23,10 +23,14 @@ export const Register = ({ setAlert }) => {
         if(password !== password2){
             setAlert('Passwords do not match', 'danger', 3000)
         } else {
-            console.log('Success')
+            register({ name, email, password});
         }
     }
       
+    if(isAuthenticated){
+      return <Redirect to='/dashboard' />
+    }
+     
     return (
         <Fragment>
             <section className="container">
@@ -36,7 +40,7 @@ export const Register = ({ setAlert }) => {
       <p className="lead"><i className="fas fa-user"></i> Create Your Account</p>
       <form className="form" onSubmit= {e => onSubmit(e)}>
         <div className="form-group">
-          <input type="text" placeholder="Name" name='name' value={name} onChange={e=> onChange(e)} required />
+          <input type="text" placeholder="Name" name='name' value={name} onChange={e=> onChange(e)}  />
         </div>
         <div className="form-group">
           <input type="email" placeholder="Email Address" name='email' value={email} onChange={e=> onChange(e)} />
@@ -46,10 +50,10 @@ export const Register = ({ setAlert }) => {
           </small>
         </div>
         <div className="form-group">
-          <input type="password" placeholder="Password" minlength="6" name='password' value={password} onChange={e=> onChange(e)} />
+          <input type="password" placeholder="Password"  name='password' value={password} onChange={e=> onChange(e)} />
         </div>
         <div className="form-group">
-          <input type="password" placeholder="Confirm Password" minlength="6" name='password2' value={password2} onChange={e=> onChange(e)} />
+          <input type="password" placeholder="Confirm Password"  name='password2' value={password2} onChange={e=> onChange(e)} />
         </div>
         <input type="submit" value="Register" className="btn btn-primary" />
       </form>
@@ -62,7 +66,14 @@ export const Register = ({ setAlert }) => {
 }
 
 Register.propTypes ={
-    setAlert: PropTypes.func.isRequired
+    setAlert: PropTypes.func.isRequired,
+    register: PropTypes.func.isRequired,
+    isAuthenticated: PropTypes.bool
 }
 
-export default connect( null, {setAlert})(Register);
+const mapStatetoprops = state =>({
+  isAuthenticated: state.auth.isAuthenticated
+})
+
+
+export default connect( mapStatetoprops, {setAlert, register })(Register);
