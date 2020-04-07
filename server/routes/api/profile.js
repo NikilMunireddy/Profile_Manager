@@ -6,6 +6,7 @@ const request = require('request')
 const config =require('config')
 const Profile = require('../../models/Profile')
 const User = require('../../models/Users')
+const Post = require('../../models/Post')
 
 //@route    GET api/profile/me
 // @desc    Get current user profile
@@ -85,7 +86,7 @@ check('skills', 'Skills is required').not().isEmpty()
         }
         // Create
         profile= new Profile(profileFields);
-
+        console.log(profile)
         await profile.save()
         res.json(profile)
     } catch (err) {
@@ -142,6 +143,7 @@ router.get('/user/:user_id', async (req, res) => {
 
 router.delete('/',auth,  async (req, res) => {
     try {
+      await Post.deleteMany({user: req.user.id})
       await Profile.findOneAndRemove({user: req.user.id}) // remove profile
       await User.findOneAndRemove({_id: req.user.id}) // removes user
       res.json({msg: 'User removed '});
@@ -325,7 +327,7 @@ curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoi
 /*   POST /profile/  Create profile
 
 curl -d '{ "company" :"Marriott","website":"https://marriott.com/","location":"chennai","status":"Developer","skills":"Java, Python, react, HTML"}' \
--H "Content-Type: application/json" -H "x-auth-token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4ODE0NTM0MGNmMzcwOThjNTY3MzViIn0sImlhdCI6MTU4NTk3NjQwNCwiZXhwIjoxNTg2MzM2NDA0fQ.COjLQj8GodselvU6nPB_-2yNwMlRNamJuHhesY-fvW8" -X POST "http://localhost:5000/api/profile"
+-H "Content-Type: application/json" -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWU4ODE0NTM0MGNmMzcwOThjNTY3MzViIn0sImlhdCI6MTU4NTk3NjQwNCwiZXhwIjoxNTg2MzM2NDA0fQ.COjLQj8GodselvU6nPB_-2yNwMlRNamJuHhesY-fvW8" -X POST "http://localhost:5000/api/profile"
 
 */
 
