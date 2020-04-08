@@ -12,6 +12,10 @@ import { logout } from '../../actions/auth'
           <Link to="/profiles">
             Developers
           </Link></li>
+        <li>
+          <Link to="/posts">
+            Posts
+          </Link></li>
        <li>
           <Link to="/dashboard">
             <i className="fas fa-user"/>{' '}
@@ -37,7 +41,7 @@ import { logout } from '../../actions/auth'
     <nav className="navbar bg-dark">
       <h1>
         <Link to='/'>
-          <i className="fas fa-code"></i> DevConnector
+          <i className="fas fa-code"></i> Profile Manager 
         </Link>
         </h1>
    { !loading && (<Fragment>{  isAuthenticated ? authLinks : guestLinks }</Fragment>)}
