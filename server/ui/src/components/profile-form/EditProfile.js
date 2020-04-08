@@ -44,7 +44,7 @@ const EditProfile =({
             youtube: loading || !profile.social ? '' : profile.social.youtube,
             instagram: loading || !profile.social ? '' : profile.social.instagram
         })
-    }, [loading])  // when its loading this should run 
+    }, [loading, getCurrentProfile, profile])  // when its loading this should run 
     const {
         company,
         website,
